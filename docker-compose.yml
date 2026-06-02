@@ -25,3 +25,9 @@ services:
       - /app/node_modules
     depends_on:
       - backend
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+
