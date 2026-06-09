@@ -101,5 +101,3 @@ Haz clic en "Login" y tendrás acceso visual completo a todas tus tablas y datos
 * /frontend: Contiene la aplicación cliente de React + TypeScript + Tailwind.
 * /docker-compose.yml: Configuración para orquestar los contenedores.
 * /README.md: Documentación adicional de la Arquitectura Limpia empleada.
-prueba guillermo
-
