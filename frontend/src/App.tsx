@@ -1,182 +1,292 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { RolesPage } from './pages/RolesPage';
 import { PermissionsView } from './pages/PermissionsView';
-import { RolesView } from './pages/RolesPage';
 
-type Page = 'home' | 'permissions' | 'roles';
+// ── 🌗 CONFIGURACIÓN DE TEMAS DINÁMICOS (PALETA DE COLORES) ──
+type Theme = 'unah-dark' | 'unah-deep' | 'unah-cyber';
 
-function App() {
-  const [page, setPage] = useState<Page>('home');
+interface ThemeConfig {
+  bg: string;
+  panel: string;
+  border: string;
+  accent: string;
+  accentHover: string;
+  textMuted: string;
+}
 
+const themePresets: Record<Theme, ThemeConfig> = {
+  'unah-dark': {
+    bg: 'bg-[#070a13]',
+    panel: 'bg-[#0c1220]',
+    border: 'border-gray-800/80',
+    accent: 'bg-yellow-500 text-black',
+    accentHover: 'hover:bg-yellow-600',
+    textMuted: 'text-gray-400'
+  },
+  'unah-deep': {
+    bg: 'bg-[#020617]',
+    panel: 'bg-[#0f172a]',
+    border: 'border-slate-800',
+    accent: 'bg-blue-600 text-white',
+    accentHover: 'hover:bg-blue-700',
+    textMuted: 'text-slate-400'
+  },
+  'unah-cyber': {
+    bg: 'bg-[#05050a]',
+    panel: 'bg-[#0a0a14]',
+    border: 'border-indigo-950/60',
+    accent: 'bg-emerald-500 text-black',
+    accentHover: 'hover:bg-emerald-600',
+    textMuted: 'text-zinc-500'
+  }
+};
+
+// ── 🏠 VISTA DE INICIO (ESTILO CAMPUS VIRTUAL) ──
+const HomePage: React.FC<{ theme: ThemeConfig }> = ({ theme }) => {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <nav className="sticky top-0 z-50 bg-slate-950/95 border-b border-slate-900 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center font-bold text-slate-950 shadow-xl shadow-amber-500/20">
-              UC
-            </div>
+    <div className="space-y-8 animate-fadeIn">
+      {/* Banner de Bienvenida Institucional */}
+      <div className={`${theme.panel} border ${theme.border} rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-2xl`}>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="max-w-2xl relative z-10">
+          <span className="text-xs font-bold text-yellow-500 uppercase tracking-widest block mb-2">Plataforma de Control</span>
+          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-none">
+            Seguridad y permisos para tu equipo
+          </h1>
+          <p className={`${theme.textMuted} mt-3 text-sm md:text-base leading-relaxed`}>
+            Bienvenido al panel centralizado de <span className="text-blue-400 font-semibold">UNAH Conecta</span>. Desde aquí puedes auditar el acceso, gestionar roles y administrar matrices de permisos relacionales para todo el ecosistema universitario.
+          </p>
+        </div>
+      </div>
+
+      {/* Grilla de Asignaturas / Módulos Operativos */}
+      <div>
+        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span className="w-2 h-5 bg-yellow-500 rounded-sm block"></span>
+          Mis Módulos Administrativos
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Tarjeta 1: Roles */}
+          <div className={`${theme.panel} border ${theme.border} rounded-xl p-5 shadow-xl flex flex-col justify-between group hover:scale-[1.01] transition-all duration-200`}>
             <div>
-              <p className="text-base font-bold tracking-tight text-white">UNAH Conecta</p>
-              <p className="text-xs uppercase text-amber-400 tracking-[0.2em]">Seguridad y permisos</p>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xl p-2 bg-blue-500/10 rounded-lg text-blue-400">👥</span>
+                <span className="text-[10px] bg-blue-500/10 border border-blue-500/30 text-blue-400 font-bold px-2 py-0.5 rounded-md uppercase">Activo</span>
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">Roles de Usuario</h3>
+              <p className={`${theme.textMuted} text-xs mt-2 mb-4 leading-relaxed`}>
+                Configuración global de perfiles institucionales, herencia de funciones y asignación directa de responsabilidades de red.
+              </p>
             </div>
+            <Link to="/roles" className="w-full text-center py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors shadow-lg">
+              Ingresar al Módulo
+            </Link>
           </div>
 
-          <div className="flex gap-3">
-            <button
-              onClick={() => setPage('home')}
-              className={`px-4 py-2 rounded-2xl text-sm font-semibold transition ${page === 'home' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
-            >
-              Inicio
-            </button>
-            <button
-              onClick={() => setPage('roles')}
-              className={`px-4 py-2 rounded-2xl text-sm font-semibold transition ${page === 'roles' ? 'bg-blue-500 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
-            >
-              👥 Roles
-            </button>
-            <button
-              onClick={() => setPage('permissions')}
-              className={`px-4 py-2 rounded-2xl text-sm font-semibold transition ${page === 'permissions' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
-            >
-              🔑 Permisos
+          {/* Tarjeta 2: Permisos */}
+          <div className={`${theme.panel} border ${theme.border} rounded-xl p-5 shadow-xl flex flex-col justify-between group hover:scale-[1.01] transition-all duration-200`}>
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xl p-2 bg-yellow-500/10 rounded-lg text-yellow-400">🔑</span>
+                <span className="text-[10px] bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 font-bold px-2 py-0.5 rounded-md uppercase">Activo</span>
+              </div>
+              <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors">Matriz de Permisos</h3>
+              <p className={`${theme.textMuted} text-xs mt-2 mb-4 leading-relaxed`}>
+                Gestión de acciones atómicas y controles ACL por módulos, protegiendo las peticiones hacia el núcleo del backend.
+              </p>
+            </div>
+            <Link to="/permissions" className="w-full text-center py-2 bg-yellow-500 hover:bg-yellow-600 text-black text-xs font-bold rounded-lg transition-colors shadow-lg">
+              Ingresar al Módulo
+            </Link>
+          </div>
+
+          {/* Tarjeta 3: Usuarios */}
+          <div className={`${theme.panel} border ${theme.border} rounded-xl p-5 shadow-xl flex flex-col justify-between opacity-60 border-dashed`}>
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xl p-2 bg-purple-500/10 rounded-lg text-purple-400">👤</span>
+                <span className="text-[10px] bg-gray-800 text-gray-400 font-bold px-2 py-0.5 rounded-md uppercase">Espera</span>
+              </div>
+              <h3 className="text-lg font-bold text-white">Cuentas de Usuario</h3>
+              <p className={`${theme.textMuted} text-xs mt-2 mb-4 leading-relaxed`}>
+                Gestión integrada de identidades de estudiantes, docentes y personal de soporte con autenticación centralizada.
+              </p>
+            </div>
+            <button disabled className="w-full py-2 bg-gray-800 text-gray-500 text-xs font-bold rounded-lg cursor-not-allowed">
+              Próximamente
             </button>
           </div>
         </div>
-      </nav>
+      </div>
 
-      <main className="pb-16">
-        {page === 'home' && (
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="rounded-[2rem] border border-slate-900 bg-slate-950/90 p-10 shadow-2xl shadow-slate-950/40">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                <div className="max-w-3xl">
-                  <p className="text-amber-400 uppercase text-xs tracking-[0.3em] mb-4">Bienvenido</p>
-                  <h1 className="text-5xl font-black text-white mb-4">Seguridad y permisos para tu equipo</h1>
-                  <p className="text-slate-400 text-lg leading-8">
-                    En UNAH Conecta puedes administrar roles, permisos y acceso de forma sencilla. Avanza en tu trabajo con módulos claros y con el apoyo de una interfaz moderna.
-                  </p>
-                </div>
-                <div className="rounded-3xl border border-slate-900 bg-slate-900/70 p-6 shadow-xl shadow-slate-950/20">
-                  <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Estado general</p>
-                  <div className="mt-4 space-y-3">
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-950/80 px-4 py-3">
-                      <span className="text-slate-200">Roles</span>
-                      <span className="rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold uppercase text-white">Listo</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-950/80 px-4 py-3">
-                      <span className="text-slate-200">Permisos</span>
-                      <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold uppercase text-slate-950">Listo</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-950/80 px-4 py-3">
-                      <span className="text-slate-200">Usuarios</span>
-                      <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">En desarrollo</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-950/80 px-4 py-3">
-                      <span className="text-slate-200">Auditoría</span>
-                      <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">En desarrollo</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-950/80 px-4 py-3">
-                      <span className="text-slate-200">Bitácora</span>
-                      <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">En desarrollo</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-950/80 px-4 py-3">
-                      <span className="text-slate-200">Respaldos</span>
-                      <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">En desarrollo</span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-2xl bg-slate-950/80 px-4 py-3">
-                      <span className="text-slate-200">ACL/RBAC</span>
-                      <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">En desarrollo</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      {/* Secciones en Construcción (Bitácora, Respaldos, ACL) */}
+      <div>
+        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span className="w-2 h-5 bg-orange-500 rounded-sm block"></span>
+          Herramientas del Sistema (En Desarrollo)
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Bitácora */}
+          <div className={`${theme.panel} border ${theme.border} p-4 rounded-xl flex items-center gap-4 opacity-50 hover:opacity-70 transition-opacity`}>
+            <span className="text-2xl p-2 bg-orange-500/10 rounded-lg text-orange-400">📝</span>
+            <div>
+              <h4 className="text-sm font-bold text-white">Bitácora de Eventos</h4>
+              <p className={`${theme.textMuted} text-[11px]`}>Logs y auditoría de transacciones.</p>
+            </div>
+          </div>
+          {/* Respaldos */}
+          <div className={`${theme.panel} border ${theme.border} p-4 rounded-xl flex items-center gap-4 opacity-50 hover:opacity-70 transition-opacity`}>
+            <span className="text-2xl p-2 bg-cyan-500/10 rounded-lg text-cyan-400">💾</span>
+            <div>
+              <h4 className="text-sm font-bold text-white">Copias de Respaldo</h4>
+              <p className={`${theme.textMuted} text-[11px]`}>Backups automatizados SQL/Docker.</p>
+            </div>
+          </div>
+          {/* ACL */}
+          <div className={`${theme.panel} border ${theme.border} p-4 rounded-xl flex items-center gap-4 opacity-50 hover:opacity-70 transition-opacity`}>
+            <span className="text-2xl p-2 bg-emerald-500/10 rounded-lg text-emerald-400">🛡️</span>
+            <div>
+              <h4 className="text-sm font-bold text-white">Políticas ACL / RBAC</h4>
+              <p className={`${theme.textMuted} text-[11px]`}>Reglas avanzadas basadas en tokens.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-              <div className="mt-12 grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-                <article className="rounded-[1.75rem] border border-slate-900 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/20 transition hover:-translate-y-1">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-white">👥 Roles</h2>
-                    <span className="rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold uppercase text-white">Operativo</span>
-                  </div>
-                  <p className="text-slate-400 mb-6">
-                    Define qué puede hacer cada usuario. Crea, edita y elimina roles con nombre y descripción, y asigna permisos según tus necesidades.
-                  </p>
-                  <button
-                    onClick={() => setPage('roles')}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition"
-                  >
-                    Ver Roles
-                  </button>
-                </article>
-                <article className="rounded-[1.75rem] border border-slate-900 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/20 transition hover:-translate-y-1">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-white">🔑 Permisos</h2>
-                    <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold uppercase text-slate-950">Operativo</span>
-                  </div>
-                  <p className="text-slate-400 mb-6">
-                    Controla las acciones disponibles para cada rol. Agrega permisos por módulo y mantén el acceso seguro y ordenado.
-                  </p>
-                  <button
-                    onClick={() => setPage('permissions')}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/20 hover:bg-amber-400 transition"
-                  >
-                    Ver Permisos
-                  </button>
-                </article>
-                <article className="rounded-[1.75rem] border border-slate-900 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/20 opacity-90">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-white">👤 Usuarios</h2>
-                    <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">Próximamente</span>
-                  </div>
-                  <p className="text-slate-400">
-                    Próximo módulo para gestionar usuarios activos, sus perfiles y los roles asignados en la plataforma.
-                  </p>
-                </article>
-                <article className="rounded-[1.75rem] border border-slate-900 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/20 opacity-90">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-white">📊 Auditoría</h2>
-                    <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">Próximamente</span>
-                  </div>
-                  <p className="text-slate-400">
-                    En desarrollo: registro de eventos y análisis de seguridad para revisar cambios en roles y permisos.
-                  </p>
-                </article>
-                <article className="rounded-[1.75rem] border border-slate-900 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/20 opacity-90">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-white">📝 Bitácora</h2>
-                    <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">Próximamente</span>
-                  </div>
-                  <p className="text-slate-400">
-                    Módulo planeado para mantener un historial de cambios, accesos y eventos clave del sistema.
-                  </p>
-                </article>
-                <article className="rounded-[1.75rem] border border-slate-900 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/20 opacity-90">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-white">💾 Respaldos</h2>
-                    <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">Próximamente</span>
-                  </div>
-                  <p className="text-slate-400">
-                    En desarrollo: gestión de copias de seguridad para proteger la información crítica de la plataforma.
-                  </p>
-                </article>
-                <article className="rounded-[1.75rem] border border-slate-900 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/20 opacity-90">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-white">🔐 ACL / RBAC</h2>
-                    <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-semibold uppercase text-slate-300">Próximamente</span>
-                  </div>
-                  <p className="text-slate-400">
-                    En desarrollo: control de acceso avanzado basado en roles y listas de control para reforzar la seguridad.
-                  </p>
-                </article>
+// ── 💻 COMPONENTE MAESTRO APP ──
+export default function App() {
+  const [currentTheme, setCurrentTheme] = useState<Theme>('unah-dark');
+  const [apiConnected, setApiConnected] = useState<boolean | null>(null);
+
+  const activeTheme = themePresets[currentTheme];
+
+  // Verificación reactiva del estado del API
+  useEffect(() => {
+    const checkApi = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/health');
+        setApiConnected(res.ok);
+      } catch {
+        setApiConnected(false);
+      }
+    };
+    checkApi();
+    const interval = setInterval(checkApi, 10000); // Re-verificar cada 10s
+    return () => clearInterval(interval);
+  }, []);
+
+  const toggleTheme = () => {
+    const themes: Theme[] = ['unah-dark', 'unah-deep', 'unah-cyber'];
+    const nextIndex = (themes.indexOf(currentTheme) + 1) % themes.length;
+    setCurrentTheme(themes[nextIndex]);
+  };
+
+  return (
+    <Router>
+      <div className={`min-h-screen ${activeTheme.bg} text-white font-sans antialiased flex flex-col transition-colors duration-300`}>
+        
+        {/* BARRA SUPERIOR (HEADER TIPO CAMPUS VIRTUAL) */}
+        <header className={`${activeTheme.panel} border-b ${activeTheme.border} h-16 px-6 sticky top-0 z-50 flex justify-between items-center backdrop-blur-md bg-opacity-95`}>
+          {/* Logo y Eslogan */}
+          <div className="flex items-center gap-3">
+            <div className="bg-yellow-500 text-black font-black w-8 h-8 rounded-lg flex items-center justify-center text-xs shadow-md">
+              UC
+            </div>
+            <div className="hidden sm:block">
+              <span className="font-black text-sm tracking-tight text-white block">UNAH Conecta</span>
+              <span className="text-[9px] font-bold text-yellow-500 tracking-widest block -mt-1">PORTAL DE SEGURIDAD</span>
+            </div>
+          </div>
+
+          {/* Indicador de API Dinámico e Interruptor de Tema */}
+          <div className="flex items-center gap-4">
+            {/* Indicador API Realtime */}
+            <div className="flex items-center gap-2 px-3 py-1 bg-[#131b2e]/60 rounded-full border border-gray-800 text-xs font-semibold">
+              <span className={`w-2 h-2 rounded-full animate-pulse ${
+                apiConnected === null ? 'bg-amber-400' : apiConnected ? 'bg-emerald-400' : 'bg-red-500'
+              }`}></span>
+              <span className="text-[11px] text-gray-300 hidden md:inline">Servidor:</span>
+              <span className="text-[10px] font-bold uppercase">
+                {apiConnected === null ? 'Buscando...' : apiConnected ? 'API Conectada' : 'API Desconectada'}
+              </span>
+            </div>
+
+            {/* Selector de Tema Dinámico */}
+            <button 
+              onClick={toggleTheme}
+              className="p-2 bg-gray-800/60 hover:bg-gray-800 border border-gray-700/50 rounded-lg text-xs font-bold text-yellow-400 transition-colors flex items-center gap-1.5"
+              title="Cambiar Paleta Visual"
+            >
+              🎨 <span className="hidden sm:inline text-white text-[11px]">Tema</span>
+            </button>
+          </div>
+        </header>
+
+        {/* ESTRUCTURA LATERAL Y DE CONTENIDO */}
+        <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto">
+          
+          {/* MENÚ DE NAVEGACIÓN LATERAL (SIDEBAR DEL CAMPUS) */}
+          <aside className="w-full md:w-64 p-4 md:p-6 space-y-2 border-b md:border-b-0 md:border-r border-gray-800/40 md:min-h-[calc(100vh-4rem)]">
+            <span className="text-[10px] font-bold text-gray-500 tracking-wider uppercase block px-3 mb-2">Navegación Principal</span>
+            
+            <SidebarLink to="/" label="Área Personal" icon="🏠" isHome />
+            <SidebarLink to="/roles" label="Control de Roles" icon="👥" />
+            <SidebarLink to="/permissions" label="Gestión de Permisos" icon="🔑" />
+            
+            <div className="pt-6">
+              <span className="text-[10px] font-bold text-gray-500 tracking-wider uppercase block px-3 mb-2">Mi Cuenta</span>
+              <div className="p-3 bg-gray-900/40 border border-gray-800/50 rounded-xl flex items-center gap-2.5">
+                <div className="w-7 h-7 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center font-bold text-xs">
+                  FC
+                </div>
+                <div className="truncate">
+                  <span className="text-xs font-bold text-white block truncate">F. Corrales</span>
+                  <span className="text-[10px] text-gray-500 block truncate">Sistemas UNAH</span>
+                </div>
               </div>
             </div>
-          </section>
-        )}
+          </aside>
 
-        {page === 'roles' && <RolesView />}
-        {page === 'permissions' && <PermissionsView />}
-      </main>
-    </div>
+          {/* ÁREA DE CONTENIDO DINÁMICO */}
+          <main className="flex-1 p-6 md:p-8">
+            <Routes>
+              <Route path="/" element={<HomePage theme={activeTheme} />} />
+              <Route path="/roles" element={<RolesPage />} />
+              <Route path="/permissions" element={<PermissionsView />} />
+              <Route path="*" element={<HomePage theme={activeTheme} />} />
+            </Routes>
+          </main>
+
+        </div>
+      </div>
+    </Router>
   );
 }
 
-export default App;
+// ── 🎨 COMPONENTE AUXILIAR PARA LOS BOTONES DEL SIDEBAR ──
+function SidebarLink({ to, label, icon, isHome = false }: { to: string; label: string; icon: string; isHome?: boolean }) {
+  const location = useLocation();
+  const isActive = isHome ? location.pathname === '/' : location.pathname === to;
+
+  return (
+    <Link
+      to={to}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 ${
+        isActive 
+          ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 shadow-md font-bold' 
+          : 'text-gray-400 hover:text-white hover:bg-gray-800/30'
+      }`}
+    >
+      <span className="text-sm">{icon}</span>
+      <span>{label}</span>
+      {isActive && (
+        <span className="ml-auto w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+      )}
+    </Link>
+  );
+}

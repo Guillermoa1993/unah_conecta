@@ -6,7 +6,7 @@ interface RoleData {
   descripcion?: string;
 }
 
-export const RolesView: React.FC = () => {
+export const RolesPage: React.FC = () => {
   const [roles, setRoles] = useState<RoleData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,9 +85,10 @@ export const RolesView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#070a13] p-8 text-white">
+    <div className="min-h-screen bg-[#070a13] p-4 text-white">
       <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-800 pb-5 mb-8">
+        {/* Encabezado del Módulo */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-800/60 pb-5 mb-8">
           <div>
             <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
               👥 Módulo de Roles
@@ -96,25 +97,27 @@ export const RolesView: React.FC = () => {
           </div>
           <button
             onClick={handleOpenCreateModal}
-            className="mt-4 md:mt-0 px-5 py-2.5 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all"
+            className="mt-4 md:mt-0 px-5 py-2.5 bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all text-sm"
           >
             + Nuevo Rol
           </button>
         </div>
 
-        {loading && <div className="text-center py-12 text-gray-500 animate-pulse">Cargando roles...</div>}
+        {/* Estados de Carga y Errores */}
+        {loading && <div className="text-center py-12 text-gray-500 animate-pulse text-sm">Cargando roles registrados...</div>}
         {error && (
           <div className="rounded-xl border border-red-900/50 bg-red-950/20 p-6 text-center max-w-md mx-auto">
-            <p className="text-red-400 font-medium mb-3">⚠️ Error: {error}</p>
+            <p className="text-red-400 font-medium mb-3 text-sm">⚠️ Error: {error}</p>
             <button
               onClick={fetchRoles}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors"
+              className="px-4 py-2 bg-red-500 text-white rounded-lg text-xs font-semibold hover:bg-red-600 transition-colors"
             >
               Reintentar
             </button>
           </div>
         )}
 
+        {/* Grilla de Roles */}
         {!loading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {roles.map((role) => (
@@ -122,36 +125,36 @@ export const RolesView: React.FC = () => {
                 key={role.id_roles}
                 className="relative rounded-2xl border border-gray-800 bg-[#0c1220] p-6 shadow-xl hover:border-blue-500/30 transition-all group"
               >
-                <div className="absolute top-4 right-4 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
-                  Rol
+                <div className="absolute top-4 right-4 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">
+                  Perfil
                 </div>
 
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 rounded-xl bg-[#151f33] text-blue-400 group-hover:scale-110 transition-transform">
+                  <div className="p-2.5 rounded-xl bg-[#151f33] text-blue-400 group-hover:scale-110 transition-transform text-md">
                     👤
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-white group-hover:text-blue-400 transition-colors">
+                    <h3 className="font-bold text-base text-white group-hover:text-blue-400 transition-colors">
                       {role.nombre_rol}
                     </h3>
-                    <p className="text-gray-500 text-xs mt-0.5">ID: {role.id_roles}</p>
+                    <p className="text-gray-500 text-[11px] font-mono">ID: #{role.id_roles}</p>
                   </div>
                 </div>
 
-                <p className="text-gray-400 text-sm mb-6 min-h-[3rem]">
-                  {role.descripcion || 'Sin descripción'}
+                <p className="text-gray-400 text-xs mb-6 min-h-[3rem] leading-relaxed">
+                  {role.descripcion || 'Sin descripción asignada para este rol institucional.'}
                 </p>
 
                 <div className="flex gap-2 items-center border-t border-gray-800/60 pt-4">
                   <button
                     onClick={() => role.id_roles && handleOpenEditModal(role)}
-                    className="flex-1 py-2 px-3 text-sm bg-[#161f32] text-white hover:bg-[#1f2c47] font-semibold rounded-xl transition-colors"
+                    className="flex-1 py-2 px-3 text-xs bg-[#161f32] text-white hover:bg-[#1f2c47] font-semibold rounded-xl transition-colors"
                   >
                     ✏️ Editar
                   </button>
                   <button
                     onClick={() => role.id_roles && handleDeleteRole(role.id_roles)}
-                    className="py-2 px-3 bg-red-950/20 border border-red-900/40 hover:bg-red-900/20 text-red-400 rounded-xl transition-colors"
+                    className="py-2 px-3 bg-red-500/10 border border-red-500/20 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold rounded-xl transition-all"
                   >
                     🗑️
                   </button>
@@ -160,51 +163,52 @@ export const RolesView: React.FC = () => {
             ))}
 
             {roles.length === 0 && (
-              <div className="col-span-full text-center py-12 text-gray-600 border-2 border-dashed border-gray-900 rounded-2xl">
-                No hay roles creados todavía.
+              <div className="col-span-full text-center py-12 text-gray-500 italic text-sm border-2 border-dashed border-gray-800 rounded-2xl bg-[#0c1220]/30">
+                No hay roles creados todavía en el sistema.
               </div>
             )}
           </div>
         )}
 
+        {/* Modal de Creación / Edición */}
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-2xl border border-gray-800 bg-[#0b0f19] p-6 shadow-2xl text-white">
-              <h3 className="text-xl font-bold mb-4 text-blue-400">
-                {selectedRole ? '✏️ Editar Rol' : '👥 Nuevo Rol'}
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-2xl border border-gray-800 bg-[#0b0f19] p-6 shadow-2xl text-white mx-4 animate-scaleUp">
+              <h3 className="text-lg font-bold mb-4 text-blue-400 flex items-center gap-1.5">
+                {selectedRole ? '✏️ Editar Rol de Usuario' : '👥 Crear Nuevo Rol'}
               </h3>
               <form onSubmit={handleSaveRole} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Nombre del Rol</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nombre del Rol</label>
                   <input
                     type="text"
                     required
                     placeholder="Ej. Administrador"
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#131a26] border border-gray-800 text-white focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#131a26] border border-gray-800 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     value={nombreRol}
                     onChange={(e) => setNombreRol(e.target.value)}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Descripción</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Descripción Funcional</label>
                   <textarea
-                    placeholder="Describe el rol..."
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#131a26] border border-gray-800 text-white focus:outline-none focus:border-blue-500 h-24 resize-none"
+                    placeholder="Escriba el alcance o responsabilidades de este perfil..."
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#131a26] border border-gray-800 text-white text-sm focus:outline-none focus:border-blue-500 h-24 resize-none transition-colors"
                     value={descripcion}
                     onChange={(e) => setDescripcion(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-3 pt-4 border-t border-gray-800">
+                <div className="flex gap-3 pt-4 border-t border-gray-800/80">
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 px-4 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-600 transition-colors"
+                    className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-lg"
                   >
                     {selectedRole ? 'Actualizar' : 'Crear'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="flex-1 py-2.5 px-4 bg-gray-800 text-white font-bold rounded-xl hover:bg-gray-700 transition-colors"
+                    className="flex-1 py-2.5 px-4 bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold rounded-xl transition-colors"
                   >
                     Cancelar
                   </button>
