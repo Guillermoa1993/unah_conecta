@@ -1,5 +1,5 @@
 import { HealthRepository, DbStatusInfo } from '../../domain/repositories/HealthRepository';
-import { pool } from '../database/db';
+import pool from '../database/db';
 
 export class PostgresHealthRepository implements HealthRepository {
   async checkDatabaseStatus(): Promise<DbStatusInfo> {

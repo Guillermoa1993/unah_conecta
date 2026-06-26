@@ -1,16 +1,32 @@
-# Node modules
+# Dependencias
 node_modules/
+**/node_modules/
 
-# Build outputs
+# Build
 dist/
-dist-ssr/
-*.local
+**/dist/
+build/
 
-# Environment files
+# Variables de entorno (NUNCA commitear)
 .env
-.env.production
-.env.local
+**/.env
+!**/.env.example
 
-# OS files
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
 .DS_Store
 Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# TypeScript compilado
+**/dist/

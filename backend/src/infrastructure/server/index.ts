@@ -2,99 +2,108 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+// Infrastructure
+import pool from '../database/db';
+import { PostgresHealthRepository } from '../repositories/PostgresHealthRepository';
+import { PostgresUsuarioRepository } from '../repositories/PostgresUsuarioRepository';
+import { PostgresEventoRepository } from '../repositories/PostgresEventoRepository';
+import { PostgresInscripcionRepository } from '../repositories/PostgresInscripcionRepository';
+import { PostgresAsistenciaRepository } from '../repositories/PostgresAsistenciaRepository';
+import { PostgresConstanciaRepository } from '../repositories/PostgresConstanciaRepository';
+import { PostgresNotificacionRepository } from '../repositories/PostgresNotificacionRepository';
+
+// Use cases
+import { GetHealthReport } from '../../use-cases/GetHealthReport';
+import { LoginUsuario } from '../../use-cases/auth/LoginUsuario';
+import { RegistrarUsuario } from '../../use-cases/auth/RegistrarUsuario';
+import { CrearEvento } from '../../use-cases/eventos/CrearEvento';
+import { ObtenerEventos } from '../../use-cases/eventos/ObtenerEventos';
+import { ObtenerEventoPorId } from '../../use-cases/eventos/ObtenerEventoPorId';
+import { ActualizarEvento } from '../../use-cases/eventos/ActualizarEvento';
+import { AprobarRechazarEvento } from '../../use-cases/eventos/AprobarRechazarEvento';
+import { InscribirEstudiante } from '../../use-cases/inscripciones/InscribirEstudiante';
+import { CancelarInscripcion } from '../../use-cases/inscripciones/CancelarInscripcion';
+import { RegistrarAsistenciaQR } from '../../use-cases/asistencia/RegistrarAsistenciaQR';
+import { GestionarConstancia } from '../../use-cases/constancias/GestionarConstancia';
+
+// Controllers
+import { HealthController } from '../../interfaces/controllers/HealthController';
+import { AuthController } from '../../interfaces/controllers/AuthController';
+import { EventoController } from '../../interfaces/controllers/EventoController';
+import { InscripcionController } from '../../interfaces/controllers/InscripcionController';
+import { AsistenciaController } from '../../interfaces/controllers/AsistenciaController';
+import { ConstanciaController } from '../../interfaces/controllers/ConstanciaController';
+import { NotificacionController } from '../../interfaces/controllers/NotificacionController';
+
+// Routes
+import { authRouter } from '../../interfaces/routes/authRoutes';
+import { eventoRouter } from '../../interfaces/routes/eventoRoutes';
+import { inscripcionRouter } from '../../interfaces/routes/inscripcionRoutes';
+import { asistenciaRouter } from '../../interfaces/routes/asistenciaRoutes';
+import { constanciaRouter } from '../../interfaces/routes/constanciaRoutes';
+import { notificacionRouter } from '../../interfaces/routes/notificacionRoutes';
+
+// Middleware
+import { errorMiddleware } from '../../interfaces/middlewares/errorMiddleware';
+
 dotenv.config();
 
-// ── 📁 REUTICACIÓN CORRECTA DE DIRECTORIOS (Arquitectura Limpia) ──
-
-// ── Repositorios (Infrastructure) ───────────────────────────
-import { PostgresHealthRepository } from '../repositories/PostgresHealthRepository';
-import { PostgresRoleRepository } from '../repositories/PostgresRoleRepository';
-import { PostgresPermissionRepository } from '../repositories/PostgresPermissionRepository';
-
-// ── Casos de Uso (Use Cases) ────────────────────────────────
-import { GetHealthReport } from '../../use-cases/GetHealthReport';
-import {
-  GetAllRoles,
-  GetRoleById,
-  CreateRole,
-  UpdateRole,
-  DeleteRole,
-} from '../../use-cases/RoleUseCases';
-import {
-  GetAllPermissions,
-  GetPermissionById,
-  CreatePermission,
-  UpdatePermission,
-  DeletePermission,
-} from '../../use-cases/PermissionUseCases';
-
-// ── Controladores (Interfaces / Controllers) ────────────────
-import { HealthController } from '../../interfaces/controllers/HealthController';
-import { RoleController } from '../../interfaces/controllers/RoleController';
-import { PermissionController } from '../../interfaces/controllers/PermissionController';
-
 const app = express();
+const PORT = process.env.PORT ?? 5000;
 
-// Convertimos a número para evitar errores de sobrecarga de métodos en Express y Docker
-const PORT = Number(process.env.PORT) || 5000;
-
-// CONFIGURACIÓN CORS: Acepta tanto solicitudes locales como de red
-app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
-
+app.use(cors({ origin: process.env.FRONTEND_URL ?? '*' }));
 app.use(express.json());
 
-// ── Inyección de dependencias: Health ───────────────────────
-const healthRepository = new PostgresHealthRepository();
-const getHealthReport  = new GetHealthReport(healthRepository);
-const healthController = new HealthController(getHealthReport);
+// ── Repositorios ────────────────────────────────────────────────────────────
+const healthRepo        = new PostgresHealthRepository();
+const usuarioRepo       = new PostgresUsuarioRepository(pool);
+const eventoRepo        = new PostgresEventoRepository(pool);
+const inscripcionRepo   = new PostgresInscripcionRepository(pool);
+const asistenciaRepo    = new PostgresAsistenciaRepository(pool);
+const constanciaRepo    = new PostgresConstanciaRepository(pool);
+const notificacionRepo  = new PostgresNotificacionRepository(pool);
 
-// ── Inyección de dependencias: Roles ────────────────────────
-const roleRepository = new PostgresRoleRepository();
-const roleController = new RoleController(
-  new GetAllRoles(roleRepository),
-  new GetRoleById(roleRepository),
-  new CreateRole(roleRepository),
-  new UpdateRole(roleRepository),
-  new DeleteRole(roleRepository)
-);
+// ── Use cases ───────────────────────────────────────────────────────────────
+const loginUC           = new LoginUsuario(usuarioRepo);
+const registrarUC       = new RegistrarUsuario(usuarioRepo);
+const crearEventoUC     = new CrearEvento(eventoRepo);
+const obtenerEventosUC  = new ObtenerEventos(eventoRepo);
+const obtenerEventoUC   = new ObtenerEventoPorId(eventoRepo);
+const actualizarUC      = new ActualizarEvento(eventoRepo);
+const aprobarUC         = new AprobarRechazarEvento(eventoRepo, notificacionRepo);
+const inscribirUC       = new InscribirEstudiante(inscripcionRepo, eventoRepo);
+const cancelarInscUC    = new CancelarInscripcion(inscripcionRepo);
+const asistenciaQRUC    = new RegistrarAsistenciaQR(asistenciaRepo, inscripcionRepo);
+const constanciaUC      = new GestionarConstancia(constanciaRepo, eventoRepo, notificacionRepo);
 
-// ── Inyección de dependencias: Permisos ─────────────────────
-const permissionRepository = new PostgresPermissionRepository();
-const permissionController = new PermissionController(
-  new GetAllPermissions(permissionRepository),
-  new GetPermissionById(permissionRepository),
-  new CreatePermission(permissionRepository),
-  new UpdatePermission(permissionRepository),
-  new DeletePermission(permissionRepository)
-);
+// ── Controllers ─────────────────────────────────────────────────────────────
+const healthCtrl        = new HealthController(new GetHealthReport(healthRepo));
+const authCtrl          = new AuthController(loginUC, registrarUC);
+const eventoCtrl        = new EventoController(crearEventoUC, obtenerEventosUC, obtenerEventoUC, actualizarUC, aprobarUC, eventoRepo);
+const inscripcionCtrl   = new InscripcionController(inscribirUC, cancelarInscUC, inscripcionRepo);
+const asistenciaCtrl    = new AsistenciaController(asistenciaQRUC, asistenciaRepo);
+const constanciaCtrl    = new ConstanciaController(constanciaUC, constanciaRepo);
+const notificacionCtrl  = new NotificacionController(notificacionRepo);
 
-// ── Rutas de la API ─────────────────────────────────────────
+// ── Rutas ───────────────────────────────────────────────────────────────────
+app.get('/api/health', (req, res) => healthCtrl.handle(req, res));
+app.use('/api/auth',          authRouter(authCtrl));
+app.use('/api/eventos',       eventoRouter(eventoCtrl));
+app.use('/api/inscripciones', inscripcionRouter(inscripcionCtrl));
+app.use('/api/asistencia',    asistenciaRouter(asistenciaCtrl));
+app.use('/api/constancias',   constanciaRouter(constanciaCtrl));
+app.use('/api/notificaciones', notificacionRouter(notificacionCtrl));
 
-// Rutas: Health
-app.get('/api/health', (req, res) => healthController.handle(req, res));
+// ── Error handler (debe ir al final) ────────────────────────────────────────
+app.use(errorMiddleware);
 
-// Rutas: Roles
-app.get   ('/api/roles',     (req, res) => roleController.getAll(req, res));
-app.get   ('/api/roles/:id', (req, res) => roleController.getById(req, res));
-app.post  ('/api/roles',     (req, res) => roleController.create(req, res));
-app.put   ('/api/roles/:id', (req, res) => roleController.update(req, res));
-app.delete('/api/roles/:id', (req, res) => roleController.delete(req, res));
-
-// Rutas: Permisos
-app.get   ('/api/permissions',     (req, res) => permissionController.getAll(req, res));
-app.get   ('/api/permissions/:id', (req, res) => permissionController.getById(req, res));
-app.post  ('/api/permissions',     (req, res) => permissionController.create(req, res));
-app.put   ('/api/permissions/:id', (req, res) => permissionController.update(req, res));
-app.delete('/api/permissions/:id', (req, res) => permissionController.delete(req, res));
-
-// CONFIGURACIÓN DE ESCUCHA: Escuchando en la interfaz global '0.0.0.0' requerida por Docker containers
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n🚀 Servidor de UNAH Conecta corriendo con éxito en http://localhost:${PORT}`);
-  console.log(`  ➔ http://localhost:${PORT}/api/health      → Estado del sistema`);
-  console.log(`  ➔ http://localhost:${PORT}/api/roles       → CRUD de Roles listo`);
-  console.log(`  ➔ http://localhost:${PORT}/api/permissions → CRUD de Permisos listo\n`);
+app.listen(PORT, () => {
+  console.log(`\n🚀 UNAH Conecta API corriendo en http://localhost:${PORT}`);
+  console.log(`   Health:         GET  /api/health`);
+  console.log(`   Auth:           POST /api/auth/login | POST /api/auth/registro`);
+  console.log(`   Eventos:        GET  /api/eventos`);
+  console.log(`   Inscripciones:  POST /api/inscripciones/evento/:id`);
+  console.log(`   Asistencia:     POST /api/asistencia/qr`);
+  console.log(`   Constancias:    GET  /api/constancias/pendientes`);
+  console.log(`   Notificaciones: GET  /api/notificaciones\n`);
 });
